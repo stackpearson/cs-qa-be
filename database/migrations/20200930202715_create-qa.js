@@ -2,33 +2,66 @@ exports.up = function(knex) {
     return knex.schema
       .createTable('users', tbl => {
         tbl.increments();
-        tbl.string('googleId', 128)
-        tbl.string('name', 128)
-        tbl.string('email', 128)
+        tbl.string('google_id', 128)
+            .nullable();
+        tbl.string('name', 128);
+        tbl.string('email', 128);
         tbl.string('role', 128)
+            .notNullable()
+            .defaultTo('user');
+        tbl.string('gsheet_link', 420)
+            .nullable();
       })
 
-      .createTable('users_sheets', tbl => {
+      .createTable('qa_blocks', tbl => {
         tbl.increments();
-        tbl.string('gSheetLink', 420)
+        tbl.string('block_name', 128);
+        tbl.string('status', 128)
+            .notNullable()
+            .defaultTo('incomplete');
       })
 
-      .createTable('user_sheet_relation', tbl => {
-        tbl.string('user_googleId')
-          .unsigned()
+      .createTable('grading_segments', tbl => {
+        tbl.increments();
+        tbl.integer('participant_id')
+            .unsigned()
+            .notNullable()
+            .references('users.id')
+            .onDelete('CASCADE')
+            .onUpdate('CASCADE')
+        tbl.integer('qa_block_id')
+            .unsigned()
+            .notNullable()
+            .references('qa_blocks.id')
+            .onDelete('CASCADE')
+            .onUpdate('CASCADE')
+        tbl.string('status')
           .notNullable()
-          .references('users.googleId')
-        tbl.string('user_sheetId')
-          .unsigned()
-          .notNullable()
-          .references('users_sheets.id')
+          .defaultTo('incomplete')
       })
+
+      .createTable('doing_grading', tbl => {
+        tbl.integer('grader_id')
+            .unsigned()
+            .notNullable()
+            .references('users.id')
+            .onDelete('CASCADE')
+            .onUpdate('CASCADE')
+          tbl.integer('grading_segment_id')
+            .unsigned()
+            .notNullable()
+            .references('users.id')
+            .onDelete('CASCADE')
+            .onUpdate('CASCADE')
+      })
+
   };
   
   exports.down = function(knex) {
       return knex.schema
-        .dropTableIfExists('user_sheet_relation')
-        .dropTableIfExists('user_sheets')
+        .dropTableIfExists('doing_grading')
+        .dropTableIfExists('grading_segments')
+        .dropTableIfExists('qa_blocks')
         .dropTableIfExists('users');
      
     

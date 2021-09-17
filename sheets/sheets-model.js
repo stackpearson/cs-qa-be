@@ -1,9 +1,9 @@
 const db = require('../database/db-config.js');
 
-// returns all cans in the db
-function allCans() {
+// returns all sheets in the db
+function allSheets() {
     console.log('allCans called')
-    return db('cans')
+    return db('users_sheets')
 }
 
 // returns a can by id
